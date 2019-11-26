@@ -1,0 +1,108 @@
+import random
+import timeit
+
+
+def build_max_heap(array):
+    n = len(array)
+    for i in range(int((n / 2 - 1)), -1, -1):  # Call max heapify n / 2 times down to 0
+        array = max_heapify(array, n, i)
+    return array
+
+
+def max_heapify(array, n, node):
+
+    # Obtain parent and children positions using current node
+    parent = node
+    left = 2 * node + 1
+    right = 2 * node + 2
+
+    # Determine largest child
+    if 0 <= left <= n - 1 and 0 <= right <= n - 1:  # If both are valid children, find max between them
+        largest_child = max(array[left], array[right])
+        if largest_child == array[left]:
+            largest_child_index = left
+        else:
+            largest_child_index = right
+    elif 0 <= left <= n - 1:  # Otherwise, if left child in range, it must be the left child
+        largest_child = array[left]
+        largest_child_index = left
+    elif 0 <= right <= n - 1:  # Else it must be the right child
+        largest_child = array[right]
+        largest_child_index = array[right]
+    else:
+        return array  # If both not in range, don't proceed
+
+    # Swap the largest child if it's greater than its parent
+    if largest_child > array[parent]:
+        temp = array[parent]
+        array[parent], array[largest_child_index] = array[largest_child_index], array[parent]  # Swap parent / child
+        max_heapify(array, n, array.index(temp))  # Call heapify again on previous parent
+    else:
+        return array
+
+    return array
+
+
+def heapsort(array):
+
+    # Build max heap
+    array = build_max_heap(array)
+    n = len(array)
+
+    # Delete root and heapify
+    for i in range((n - 1), 0, -1):
+        array[i], array[0] = array[0], array[i]  # Swap to "delete" node
+        max_heapify(array, i, 0)  # Heapify
+
+    return array
+
+
+def selection_sort(array):
+    for i in range(len(array)):
+        min = 999  # Start out with large min
+        min_index = 0
+        for j in range(i, len(array)):
+            if array[j] < min:  # If a number is less than min, min is now that number
+                min = array[j]
+                min_index = j
+        array[i], array[min_index] = array[min_index], array[i]  # Swap the curr element with lowest min
+
+    return array
+
+
+def main():
+    print("Part A:\n-------")
+    n = int(input("Enter a positive integer: "))
+    a = []
+    for i in range(n):
+        a.append(random.randrange(-100, 101))
+
+    num_reps = 100
+    total_time_heap = 0
+    total_time_selection = 0
+    for i in range(num_reps):
+        # Time heapsort from start to end
+        start = timeit.default_timer()
+        heapsort(a)
+        total_time_heap += timeit.default_timer() - start  # Add the times until number of reps is complete
+
+        # Same operation, just with selection sort
+        start = timeit.default_timer()
+        selection_sort(a)
+        total_time_selection += timeit.default_timer() - start
+
+    print("Avg runtime of heapsort:", round(total_time_heap / num_reps, 4))
+    print("Avg runtime of selection sort:", round(total_time_selection / num_reps, 4), "\n")
+
+    print("Part B:\n-------")
+    a = []
+    for i in range(10):
+        a.append(random.randrange(-100, 101))
+    print("Unsorted:", a)
+
+    heapsort(a)
+
+    print("\nSorted: ", a)
+
+
+main()
