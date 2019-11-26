@@ -1,0 +1,119 @@
+import random
+import math
+
+
+def find_closest_to_median():
+
+    n = int(input("Enter positive integer: "))  # size of array
+
+    # Create array of size n with rand vals: O(n)
+    a = []
+    for i in range(n):
+        a.append(random.randrange(-100, 101))
+    print(a)
+    display = a
+
+    k = int(input("Enter number between 1 to n: "))  # amount of nums closest to median
+
+    # Find median: O(n)
+    median = quick_select_med(a, math.ceil(len(a) / 2))
+
+    # Obtain difference array: O(n)
+    diff = []  # list of differences, a[i] - median
+    for i in range(len(a)):
+        diff.append(a[i] - median)
+
+    diff.remove(0)  # remove median, technically the closest num, but we don't want that
+
+    # Find kth least element: O(n)
+    quick_select_abs(diff, k, 0, len(diff) - 1)
+
+    # Find closest numbers by printing all numbers less than or equal to the abs of the kth smallest num: O(n)
+    for i in range(len(diff[0:k])):
+        print(diff[i] + median, end=" ")
+
+    display.sort()
+    print("\nSORTED:", display)
+
+
+def quick_select_med(a, k):
+
+    # Call partition helper function to partition array a
+    tail = partition_med(a)
+
+    if tail + 1 == k:  # Found the kth least element
+        return a[tail]
+    elif tail + 1 < k:  # Select the lower bound array
+        k -= len(a[: tail + 1])
+        return quick_select_med(a[tail + 1:], k)
+    else:  # Select the upper bound array
+        return quick_select_med(a[: tail], k)
+
+
+def partition_med(a):
+
+    # Pivot is the median of the first, middle, and last values in array a
+    pivot = [a[0], a[(0 + (len(a) - 1)) // 2], a[len(a) - 1]]
+    pivot.sort()
+    pivot = pivot[1]
+
+    # Push pivot to end of array, swap with element at last position in array
+    a[a.index(pivot)] = a[len(a) - 1]
+    a[len(a) - 1] = pivot
+
+    tail = 0
+    j = 0
+    while j != len(a) - 1:  # Iterate until j reaches 2nd to last position
+        if a[j] < pivot:  # Swap element if it's less than the pivot
+            temp = a[j]
+            a[j] = a[tail]
+            a[tail] = temp
+            tail += 1  # Move tail
+        j += 1  # Iterate scanner
+
+    # Final swap that swaps pivot and the tail
+    temp = a[len(a) - 1]
+    a[len(a) - 1] = a[tail]
+    a[tail] = temp
+
+    # Return index of pivot after being swapped back
+    return tail
+
+
+def quick_select_abs(a, k, begin, end):
+
+    # Call partition helper function to partition array a
+    pivot_index = partition_abs(a, begin, end)
+
+    if pivot_index == k:  # Found the kth least element
+        return a[pivot_index]
+    elif pivot_index > k:  # Select the lower bound array
+        return quick_select_abs(a, k, begin, pivot_index - 1)
+    else:  # Select the upper bound array
+        return quick_select_abs(a, k, pivot_index + 1, end)
+
+
+def partition_abs(a, begin, end):
+
+    pivot = a[end]
+
+    i = begin
+    j = begin + 1
+
+    while j != end + 1:
+
+        if abs(a[j]) < abs(pivot) < abs(a[i]):
+            a[j], a[i] = a[i], a[j]
+            i += 1
+        elif abs(a[i]) < abs(pivot):
+            i += 1
+
+        j += 1
+
+    pivot_index = i
+    a[pivot_index], a[end] = a[end], a[pivot_index]
+
+    return pivot_index
+
+
+find_closest_to_median()
